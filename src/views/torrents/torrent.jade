@@ -1,35 +1,39 @@
-- if (!torrent)
-  h2 This link is invalid
-- else
-  h2
-    span(id='title')= torrent.title
-  h3 Description
-  span(id='description') !{torrent.convdesc}
-  h3 Download
-  p
-    a(href=('/torrent/' + torrent.permalink + '/download')) Torrent (#{humanize_size(torrent.size)})
-  h3 Category
-  p
-    span(id='category')= torrent.category
-  h3 Uploaded
-  p(title=torrent.dateUploaded) #{humanize_date(torrent.dateUploaded)} 
-    - if (torrent.uploader === undefined)
-      | by Anonymous
-    - else
-      | by 
-      a(href=('/user/' + torrent.uploader))= torrent.uploader
-  h3 Statistics
-  p Peers: #{torrent.peers}, Seeds: #{torrent.seeds}, Downloads: #{torrent.snatches}
-  h3 Files
-  table#file-table
-    tr
-      th Filename
-      th Size
-    - each file in torrent.files
-      tr
-        td= file.path
-        td= humanize_size(file.size)
-  h3 Problem
-  - if(req.session.admin == true || (req.session.user && torrent.uploader !== undefined && torrent.uploader == req.session.user.name))
-    a(class='delete', href=('/torrent/' + torrent.permalink + '/delete')) Delete torrent
+extends ../layout
 
+block content
+  if !torrent
+    h2 This link is invalid
+  else
+    h2
+      span(id='title')= torrent.title
+    h3 Description
+      if torrent.infolink !== undefined
+        span(id='infolink')
+          a(href=torrent.infolink) More Information
+    span(id='description')!= torrent.convdesc
+    h3 Download
+    p
+      a(href='/torrent/' + torrent.permalink + '/download') Torrent (#{humanize_size(torrent.size)})
+    h3 Category
+    p
+      span(id='category')= torrent.category
+    h3 Uploaded
+    p(title=torrent.dateUploaded)= humanize_date(torrent.dateUploaded)
+      if torrent.uploader === undefined
+        | by Anonymous
+      else
+        | by
+        a(href=('/user/' + torrent.uploader))= torrent.uploader
+    h3 Statistics
+    p Peers: #{torrent.peers}, Seeds: #{torrent.seeds}, Downloads: #{torrent.snatches}
+    h3 Files
+    table#file-table
+      tr
+        th Filename
+        th Size
+      each file in torrent.files
+        tr
+          td= file.path
+          td= humanize_size(file.size)
+    h3 Problem
+    a(class='delete', href=('/torrent/' + torrent.permalink + '/delete')) Delete torrent

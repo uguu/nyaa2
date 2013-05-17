@@ -1,28 +1,30 @@
-h1(class='title')= title
+extends ../layout
 
-form#registration-form(method='POST')
-  div
-    .right
-      label(for='register-username') User name
-    .left
-      input(type='text', name='username', id='register-username', value='')
-  div
-    .right
-      label(for='register-password-1') Password
-    .left
-      input(type='password', name='password1', id='register-password-1')
-  div
-    .right
-      label(for='register-password-2') Confirm Password
-    .left
-      input(type='password', name='password2', id='register-password-2')
-  div
-    .right
-      label(for='register-email') Email Address
-        .small
-          | optional
-    .left
-      input(type='text', name='email', id='register-email', value='')
-  div
-    input(type='submit', value="Register")
+block content
+  h1(class='title')= title
 
+  form#registration-form(method='POST')
+    div
+      .right
+        label(for='register-username') User name
+      .left
+        input(type='text', name='username', id='register-username', value='')
+    div
+      .right
+        label(for='register-password-1') Password
+      .left
+        input(type='password', name='password1', id='register-password-1')
+    div
+      .right
+        label(for='register-password-2') Confirm Password
+      .left
+        input(type='password', name='password2', id='register-password-2')
+    div
+      .right
+        label(for='register-email') Email Address
+          .small
+            | optional
+      .left
+        input(type='text', name='email', id='register-email', value='')
+    div
+      input(type='submit', value="Register")

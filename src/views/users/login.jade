@@ -1,18 +1,21 @@
-h1(class='title')= title
+extends ../layout
 
-form#login-form(method='POST')
-  div
-    .right
-      label(for='login-username') User name
-    .left
-      input(type='text', name='username', id='login-username', value='')
-  div
-    .right
-      label(for='login-password') Password
-    .left
-      input(type='password', name='password', id='login-password')
-  div
-    input(type='submit', value="Login")
-  div
-    p No Account? 
-      a(href='/register') Register.
+block content
+  h1(class='title')= title
+  form#login-form(method='POST')
+    div
+      .right
+        label(for='login-username') User name
+      .left
+        input(type='text', name='username', id='login-username', value='')
+    div
+      .right
+        label(for='login-password') Password
+      .left
+        input(type='password', name='password', id='login-password')
+    div
+      input(type='submit', value="Login")
+    div
+      p No Account? 
+        a(href='/register') Register
+        | .

@@ -2,16 +2,14 @@
 html
   head
     title= title
-    link(rel='stylesheet', href='https://fonts.googleapis.com/css?family=Amaranth')
-    link(rel='stylesheet/less', type='text/css', href='/stylesheets/style.less')
-    noscript
-      link(rel='stylesheet', type='text/css', href='/stylesheets/style.css')
+    link(rel='stylesheet', href='//fonts.googleapis.com/css?family=Amaranth')
+    link(rel='stylesheet', type='text/css', href='/stylesheets/style.css')
     link(rel='alternate', type='application/rss+xml', title='RSS 2.0', href='/rss')
     script(src='/js/less.min.js', type='text/javascript')
-    script(src='https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.0.min.js')
+    script(src='//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js') // stick with a specific version of jquery to avoid massive breakages
     script(src='/js/jquery.jeditable.js')
-    - if(typeof js != 'undefined')
-      - each i in js
+    if typeof(js) != 'undefined'
+      each i in js
         script(src='/js/' + i)
     script
       var _gaq = _gaq || [];
@@ -23,7 +21,7 @@ html
       var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
       })();
   body
-    #header-bkg 
+    #header-bkg
       #header
         #logo
           a(href='/')
@@ -31,32 +29,32 @@ html
             | tracker
         #nav
           ul
-            - if(req.session.user)
-              li: a(href='/user/'+req.session.user.name)= req.session.user.name
-              li: a(href='/logout') Logout
-            - else
-              li: a(href='/login') Login
-            li: a(href='/upload') Upload
-            li: a(href='/rss') RSS
-            li
+            // - if(req.session.user)
+            //   li: a(href='/user/'+req.session.user.name)= req.session.user.name
+            //   li: a(href='/logout') Logout
+            // - else
+            a(href='/login'): li Login
+            a(href='/upload'): li Upload
+            a(href='/rss'): li RSS
+            li.search
               form(action='/')
                 select(name='searchcategory')
                   - each cat_option, category in categories
                     option(value=category)= category
-                input(name='searchtext', value=req.query.searchtext, size='30')
+                input(name='searchtext', value='', size='30')
                 //-input(type='submit', value='Search')
     #content
-      - var flash = req.flash()
-      - if (flash.error)
-        #flash.error= flash.error
-      - if (flash.info)
-        #flash.info= flash.info
-      !{body}
+      // - var flash = req.flash()
+      // - if (flash.error)
+        //- #flash.error= flash.error
+      // - if (flash.info)
+        //- #flash.info= flash.info
+      block content
 
     #footer
       p The uguu~tracker is still under development (
         a(href='https://github.com/mileswu/nyaa2') repo
-        |  on Github). Any bugs or requests can be filed 
-        a(href='https://github.com/mileswu/nyaa2/issues/new') here
+        |  on Github). Any bugs or requests can be filed
+        a(href='https://github.com/mileswu/nyaa2/issues/new')  here
         |  or with delamoo or torque at #uguu~subs on rizon IRC.
-      p None of the files linked here are actually hosted on this site. By downloading the files, you are claiming that you own the original. 
+      p None of the files linked here are actually hosted on this site. By downloading the files, you are claiming that you own the original.

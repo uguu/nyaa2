@@ -1,14 +1,13 @@
-//-h1 d
+extends ../layout
 
-- if (torrents.length)
-  - if (req.query.searchtext && req.query.searchcategory)
-    p Searched for "#{req.query.searchtext}" in #{req.query.searchcategory} and found #{count} torrents:
+block content
+  - if (torrents.length)
+    - if (query.searchtext && query.searchcategory)
+      p Searched for "#{query.searchtext}" in #{query.searchcategory} and found #{count} torrents:
+    - else
+      p There are #{count} torrents being tracked.
+    include torrenttable
+    p !{paginate(page, lastpage)}
+
   - else
-    p There are #{count} torrents being tracked.
-  != partial('torrenttable.jade', {object: torrents})
-  p !{paginate(page, lastpage, req)}
-
-- else
-  p There were no torrents found.
-
-
+    p There were no torrents found.

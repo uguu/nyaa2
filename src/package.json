@@ -11,6 +11,7 @@
     "redis": ">= 0.7.2",
     "connect-redis": "1.4.0",
     "express": "3.x.x",
+    "jade": "0.30.0",
     "markdown": "0.4.0",
     "rss": "0.0.3"
   },

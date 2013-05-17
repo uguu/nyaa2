@@ -1,6 +1,9 @@
-h1(class='title') Upload a torrent
+extends ../layout
 
-form(id='upload-form', method='post', enctype='multipart/form-data')
+block content
+  h1(class='title') Upload a torrent
+
+  form(id='upload-form', method='post', enctype='multipart/form-data')
     div
       .right
         label(for='upload-file') File
@@ -35,10 +38,15 @@ form(id='upload-form', method='post', enctype='multipart/form-data')
             option(value=category)= category
     div
       .right
+        label(for='info-link') Info Link
+      .left
+        input(name='infolink', id='info-link', size='40')
+    div
+      .right
         label(for='upload-description') Description<br />
           .small
-            | Parses 
-            a(href='http://daringfireball.net/projects/markdown/') markdown
+            | Parses
+            a(href='http://daringfireball.net/projects/markdown/')  markdown
             |  syntax
       .left
         textarea(id='upload-description', name='description', rows='4', cols='40')
