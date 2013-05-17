@@ -6,6 +6,7 @@ express = require 'express'
 util = require 'util'
 qs = require 'querystring'
 RedisStore = require('connect-redis')(express);
+stylus = require 'stylus'
 
 #Create express server
 app = module.exports = express()
@@ -110,6 +111,7 @@ app.configure ->
       "<div class=\"pagination\">#{pagestr}</div>"
     next()
   app.use app.router
+  app.use stylus.middleware {src: __dirname + '/public', compress: true}
   app.use express.static __dirname + '/public'
 
 port = 0
