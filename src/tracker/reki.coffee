@@ -6,7 +6,7 @@ fs   = require 'fs'
 bencode2 = require '../../lib/bencode'
 
 # defines
-ANNOUNCE_INTERVAL = 300
+ANNOUNCE_INTERVAL = 1800 # 30 mins
 MIN_INTERVAL      = 60
 DROP_COUNT = 3
 
@@ -16,13 +16,6 @@ simple_response = (res, data) ->
   res.end (bencode data)
 
 compact = (ip, port) -> (new Buffer ip.split('.').concat([port >> 8, port & 0xFF])).toString 'base64'
-#compact = (ip, port) -> ip.split('.').concat([port >> 8 & 0xFF, port & 0xFF]).map((c) -> String.fromCharCode c)
-#compact = (buf, ip, port) ->
-#  comp = ip.split '.'
-#  for i in [0..3]
-#    buf[20+i] = parseInt(comp[i])
-#  buf[24] = port >> 8
-#  buf[25] = port & 0xFF
 
 parse = (qs) ->
   obj = {}
@@ -50,7 +43,7 @@ bencode_str = (o) ->
     for i in [0..b.length-1]
       out = out + String.fromCharCode(b[i])
     return out
-  
+
   switch typeof o
     when 'string' then out = bstring o
     when 'number' then out = bint    o
@@ -97,7 +90,7 @@ class Tracker
   constructor: (port) ->
     # redis
     @redis = require('redis').createClient 6379, '127.0.0.1' #, {'return_buffers' : true})
-    
+
     # mongodb
     @torrents = null
     mongo = require('mongodb')
@@ -107,7 +100,7 @@ class Tracker
       console.log 'connected to mongodb'
       db.collection 'torrents', (err, @torrents) =>
         throw new Error('could not open collection') if err?
-    
+
     # http server
     http.createServer (req, res) =>
       #req_url = url.parse req.url
@@ -123,19 +116,19 @@ class Tracker
           res.end '!?'
       else
         res.end '!?'
-    
+
     # HEY! LISTEN!
     .listen port
-  
+
   announce: (query, req, res) ->
     get_vars = parse query
     return simple_response res, {'failure reason': 'Invalid Request'} unless get_vars['info_hash']? and get_vars['peer_id']?
-    
+
     # GET requests of interest are:
     #   info_hash, peer_id, port, uploaded, downloaded, left,   <--- REQUIRED
     #   compact, no_peer_id, event, ip, numwant, key, trackerid <--- optional
     info_hash = decodeURLtoHex get_vars['info_hash']
-    
+
     port = parseInt get_vars['port']
     left = parseInt get_vars['left']
     if info_hash == '' or get_vars['peer_id'] == '' or isNaN(port) or isNaN(left)
@@ -165,34 +158,33 @@ class Tracker
                   callback()
                 else
                   return simple_response res, {'failure reason': 'This torrent does not exist'}
-    
+
     check_exists =>
       event = get_vars['event']
       if event == 'stopped' or event == 'paused'
         return simple_response res, 'Nani?'
-      
+
       t = Date.now()
       multi = redis.multi()
         .ZREMRANGEBYSCORE(key_seed, 0, t - ANNOUNCE_INTERVAL * DROP_COUNT *1000)
         .ZREMRANGEBYSCORE(key_peer, 0, t - ANNOUNCE_INTERVAL * DROP_COUNT *1000)
-      
+
       ip = get_vars['ip'] #REALLY SHOULD CHECK THIS IS A VALID IP
       ip = req.connection.remoteAddress if !ip?
       return if !ip?
       #ip = process.env['HTTP_X_REAL_IP'] if ip is '127.0.0.1'
-      
+
       peer_entry = { 'ip' : ip, 'port' : port, 'peer_id' : get_vars['peer_id'], 'compacted' : compact(ip, port) }
 
       suffix = if (left == 0) then ":seeds" else ":peers"
       multi.ZADD key + suffix, t, JSON.stringify(peer_entry)
-      
+
       if event == 'completed' #increment snatch
         @torrents.update {'infohash': info_hash}, {$inc: {'snatches': 1}}
-      
       # Output now. Fields are:
       #   interval, complete, incomplete, peers (dict|bin) <--- REQUIRED
       #   min interval, tracker id, warning message        <--- optional
-      
+
       numwant = parseInt get_vars['numwant']
       numwant = 50 if isNaN(numwant) or numwant < 0 or numwant > 50
 
@@ -205,7 +197,6 @@ class Tracker
 
           if err? then return simple_response res, {'failure reason': 'wat'}
           doCompact = get_vars['compact'] is '1'
-          
           peerlist = replies[5].concat(replies[6])
             .slice(0, numwant)
             .map (p) ->
@@ -218,7 +209,7 @@ class Tracker
           if doCompact
             peerlist = peerlist.join ''
             peerlist = new Buffer peerlist, 'base64'
-          
+
           return simple_response res,
             'interval'     : ANNOUNCE_INTERVAL
             'complete'     : replies[3]
@@ -231,7 +222,7 @@ class Tracker
     for kvp in query.split '&'
       if kvp[0...9] is "info_hash"
         info_hashes.push decodeURLtoHex kvp[10...]
-    
+
     # Require at least one info_hash; no support for sitewide scraping.
     return simple_response res, {'failure reason': 'Invalid Request'} if info_hashes.length == 0
 
@@ -240,16 +231,16 @@ class Tracker
     @torrents.find({ 'infohash' : {$in:info_hashes} }).toArray (err, docs) =>
       return simple_response res, {'failure reason': 'No valid hashes requested'} if docs.length is 0
       infohash = []
-      snatches = [] # downloaded 
+      snatches = [] # downloaded
       for i in [0...docs.length] # not sure why but docs.length-1 skips the last item
         ih = docs[i].infohash
-        key = 'torrent:' + ih 
+        key = 'torrent:' + ih
         infohash.push ih
         snatches.push docs[i].snatches
         multi
           .ZCARD(key + ':peers') # incomplete
           .ZCARD(key + ':seeds') # complete
-      
+
       multi.exec (err, reply) -> # no real error checking here because the hashes returned by mongo should all be valid.
         j = 0
         for hash,i in infohash
