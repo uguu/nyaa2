@@ -24,12 +24,12 @@ exports.category_edit_post = (req, res) ->
       res.redirect '/admin/category/' + encodeURIComponent(oldname) + '/edit'
     else
       res.redirect '/admin/category/new'
-  
+
   if oldname and !Categories.categories[oldname]?
     req.flash 'error', 'Invalid category'
     res.redirect '/admin/categories'
     return
-  
+
 
   if !req.body.icon? or !req.body.icon
     error_func req, res, 'You must specify an icon', oldname
@@ -40,7 +40,7 @@ exports.category_edit_post = (req, res) ->
   if name != oldname and (Categories.categories[name]? or Categories.meta_categories[name]?)
     error_func req, res, 'A category named ' + name + ' already exists', oldname
     return
-  
+
   if oldname
     delete Categories.categories[oldname]
   Categories.categories[name] = {
@@ -74,31 +74,31 @@ exports.meta_category_edit_post = (req, res) ->
       res.redirect '/admin/meta-category/' + encodeURIComponent(oldname) + '/edit'
     else
       res.redirect '/admin/meta-category/new'
-  
+
   if oldname and !Categories.meta_categories[oldname]?
     req.flash 'error', 'Invalid meta-category'
     res.redirect '/admin/categories'
     return
-  
+
   if !name? or !name
     error_func req, res, 'You must specify a name', oldname
     return
   if name != oldname and (Categories.categories[name]? or Categories.meta_categories[name]?)
     error_func req, res, 'A category called ' + name + ' already exists', oldname
     return
-    
+
   cats = req.body.categories
   if !cats
     error_func req, res, 'You must specify one category', oldname
     return
-    
+
   if !Array.isArray(cats)
     cats = [cats]
   for i in cats
     if !Categories.categories[i]?
       error_func req, res, 'Form error (invalid category: ' + i +')' , oldname
       return
- 
+
   if oldname
     delete Categories.meta_categories[oldname]
   Categories.meta_categories[name] = cats
@@ -106,4 +106,4 @@ exports.meta_category_edit_post = (req, res) ->
   Categories.save()
   req.flash 'info', 'Succesfully edited'
   res.redirect '/admin/categories'
-  
+

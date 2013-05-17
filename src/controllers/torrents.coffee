@@ -52,16 +52,16 @@ Categories = require('../models/categories')
 Torrent = require('../models/torrents')
 regex_escape = (str) -> str.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&")
 
-exports.list = (req, res) -> 
+exports.list = (req, res) ->
   query = {}
   if req.query.searchcategory and req.query.searchtext
     query['category'] = req.query.searchcategory
-    
+
     searchtext = req.query.searchtext
     searchterms = searchtext.split(' ')
     searchterms = searchterms.map (t) ->
       new RegExp regex_escape(t), 'i'
-    
+
     query['title'] = {'$all' : searchterms}
 
   Torrent.count query, (err, count) ->
@@ -97,12 +97,12 @@ exports.upload_post = (req, res) ->
       hasher = crypto.createHash 'sha1'
       hasher.update bencode.bencode(torrentInfo.info)
       infohash = hasher.digest 'hex'
-  
+
       if !fields.category? or !Categories.categories[fields.category]?
         req.flash 'error', "You have somehow selected a nonexistent category."
         res.redirect '/upload'
         return
-  
+
       Torrent.findOne {'infohash' : infohash}, (err, doc) ->
         if doc
           req.flash 'error', 'This torrent has already been uploaded.'
@@ -128,7 +128,7 @@ exports.upload_post = (req, res) ->
               'path' : (torrentInfo.info.name.toString 'utf8'),
               'size' : torrentInfo.info.length
             }
-  
+
           torrent = new Torrent {
             'infohash'    : infohash,
             'size'        : size,
@@ -203,7 +203,7 @@ exports.download = (req, res) ->
           if torrentInfo['announce-list']
             delete torrentInfo['announce-list']
           torrentInfo.announce = 'http://bt-tracker.uguu-subs.org:9001/announce'
-          
+
           output = bencode.bencode torrentInfo
           res.contentType 'application/x-bittorrent'
 
@@ -266,7 +266,7 @@ exports.edit = (req, res) ->
       else
         res.send 'Not authorized to do this'
         return
-      
+
       if req.body.id == 'description'
         doc.description = req.body.value
         doc.save (err) ->
