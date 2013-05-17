@@ -8,13 +8,13 @@ qs = require 'querystring'
 RedisStore = require('connect-redis')(express);
 
 #Create express server
-app = module.exports = express.createServer()
+app = module.exports = express()
 
 #Globals
 global.site_url = "" # this should probably not be a global variable
 global.mongoose = require 'mongoose'
 global.redis = require('redis').createClient 6379, '127.0.0.1' #, {'return_buffers' : true})
-global.humanize_s = (size) -> # make global so we can use it in the Torrent schema (this is probably a bad way to do this)
+global.humanize_size = (size) -> # make global so we can use it in the Torrent schema (this is probably a bad way to do this)
   if size < 1024
     return size + ' B'
   size /= 1024
@@ -38,6 +38,77 @@ app.configure ->
   app.use express.methodOverride()
   app.use express.cookieParser()
   app.use express.session {secret: 'himitsu', store: new RedisStore}
+  app.use (req, res, next) ->
+    res.locals.query = req.query
+    res.locals.categories = Categories.categories
+    res.locals.meta_categories = Categories.meta_categories
+    res.locals.humanize_date = (date) ->
+      now = new Date
+      deltat = (now - date)/1000 #javascript uses ms
+
+      if deltat < 60
+        return "Less than a minute"
+      deltat /= 60
+      if deltat < 60
+        return deltat.toFixed(0) + " minutes"
+      deltat /= 60
+      if deltat < 24
+        return deltat.toFixed(0) + " hours"
+      deltat /= 24
+      if deltat < 30
+        return deltat.toFixed(0) + " days"
+      deltat /= 30
+      days = Math.floor((deltat % 1)*30)
+      console.log deltat
+      console.log days
+      if days > 0
+        return deltat.toFixed(0) + " months, " + days + " days"
+      else
+        return deltat.toFixed(0) + " months"
+
+    res.locals.paginate = (page, lastpage) ->
+      numlinks = 7
+      if lastpage == 1
+        return ''
+
+      bound = (i, min, max) ->
+        if i < min
+          i = min
+        else if i > max
+          i = max
+        i
+
+      if lastpage <= numlinks
+         start = 1
+         end = lastpage
+      else
+         start = bound page - (numlinks + 1) >> 1, 1, lastpage - numlinks
+         end = start + numlinks
+
+      pagestr = ''
+
+      q = {}
+      q[k] = v for k, v of req.query
+      make_url = (pagen) ->
+        q['page'] = pagen
+        req.route.path + '?' + qs.stringify q
+
+      if page != 1
+        pagestr += "<a href=\"#{make_url 1}\">&lArr; First</a>"
+        pagestr += "<a href=\"#{make_url page - 1}\">&larr; Prev</a>"
+
+      for i in [start..end] by 1
+        if i isnt page
+          pagestr += "<a href=\"#{make_url i}\">#{i}</a>"
+        else
+          pagestr += "<span class=\"thispage\">#{i}</span>"
+
+      if page != lastpage
+        pagestr += "<a href=\"#{make_url page + 1}\">Next &rarr;</a>"
+        pagestr += "<a href=\"#{make_url lastpage}\">Last &rArr;</a>"
+
+      "<div class=\"pagination\">#{pagestr}</div>"
+    next()
   app.use app.router
   app.use express.static __dirname + '/public'
 
@@ -59,77 +130,6 @@ torrents = require './controllers/torrents'
 users = require './controllers/users'
 admin = require './controllers/admin'
 Categories = require './models/categories'
-
-# Helpers
-app.dynamicHelpers
-  req: (req, res) -> return req
-  categories: (req, res) -> return Categories.categories
-  util: (req, res) -> return util
-  meta_categories: (req, res) -> return Categories.meta_categories
-
-app.helpers
-  humanize_size: humanize_s
-
-  humanize_date: (date) ->
-    now = new Date
-    deltat = (now - date)/1000 #javascript uses ms
-    
-    if deltat < 60
-      return "Less than a minute ago"
-    deltat /= 60
-    if deltat < 60
-      return deltat.toFixed(0) + " minutes ago"
-    deltat /= 60
-    if deltat < 24
-      return deltat.toFixed(0) + " hours ago"
-    deltat /= 24
-    if deltat < 30
-      return deltat.toFixed(0) + " days ago"
-    deltat /= 30
-    return deltat.toFixed(0) + " months ago"
-
-  paginate: (page, lastpage, req) ->
-    numlinks = 7
-    if lastpage == 1
-      return ''
-
-    bound = (i, min, max) ->
-      if i < min
-        i = min
-      else if i > max
-        i = max
-      i
-
-    if lastpage <= numlinks
-       start = 1
-       end = lastpage
-    else
-       start = bound page - (numlinks + 1) >> 1, 1, lastpage - numlinks
-       end = start + numlinks
-
-    pagestr = ''
-
-    q = {}
-    q[k] = v for k, v of req.query
-    make_url = (pagen) ->
-      q['page'] = pagen
-      req.route.path + '?' + qs.stringify q
-
-    if page != 1
-      pagestr += "<a href=\"#{make_url 1}\">&lArr; First</a>"
-      pagestr += "<a href=\"#{make_url page - 1}\">&larr; Prev</a>"
-    
-    for i in [start..end] by 1
-      if i isnt page
-        pagestr += "<a href=\"#{make_url i}\">#{i}</a>"
-      else
-        pagestr += "<span class=\"thispage\">#{i}</span>"
-    
-    if page != lastpage
-      pagestr += "<a href=\"#{make_url page + 1}\">Next &rarr;</a>"
-      pagestr += "<a href=\"#{make_url lastpage}\">Last &rArr;</a>"
-    
-    "<div class=\"pagination\">#{pagestr}</div>"
 
 # Routes
 app.get '/', torrents.list
