@@ -29,6 +29,27 @@ global.humanize_size = (size) -> # make global so we can use it in the Torrent s
     return size.toFixed(1) + ' GiB'
   size /= 1024
   return size.toFixed(2) + ' TiB'
+global.humanize_date = (date) ->
+  now = new Date
+  deltat = (now - date)/1000 #javascript uses ms
+
+  if deltat < 60
+    return "Less than a minute"
+  deltat /= 60
+  if deltat < 60
+    return deltat.toFixed(0) + " minutes"
+  deltat /= 60
+  if deltat < 24
+    return deltat.toFixed(0) + " hours"
+  deltat /= 24
+  if deltat < 30
+    return deltat.toFixed(0) + " days"
+  deltat /= 30
+  days = Math.floor((deltat % 1)*30)
+  if days > 0
+    return deltat.toFixed(0) + " months, " + days + " days"
+  else
+    return deltat.toFixed(0) + " months"
 
 # Configuration
 app.configure ->
@@ -43,30 +64,6 @@ app.configure ->
     res.locals.query = req.query
     res.locals.categories = Categories.categories
     res.locals.meta_categories = Categories.meta_categories
-    res.locals.humanize_date = (date) ->
-      now = new Date
-      deltat = (now - date)/1000 #javascript uses ms
-
-      if deltat < 60
-        return "Less than a minute"
-      deltat /= 60
-      if deltat < 60
-        return deltat.toFixed(0) + " minutes"
-      deltat /= 60
-      if deltat < 24
-        return deltat.toFixed(0) + " hours"
-      deltat /= 24
-      if deltat < 30
-        return deltat.toFixed(0) + " days"
-      deltat /= 30
-      days = Math.floor((deltat % 1)*30)
-      console.log deltat
-      console.log days
-      if days > 0
-        return deltat.toFixed(0) + " months, " + days + " days"
-      else
-        return deltat.toFixed(0) + " months"
-
     res.locals.paginate = (page, lastpage) ->
       numlinks = 7
       if lastpage == 1
