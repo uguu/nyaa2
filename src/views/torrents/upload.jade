@@ -25,8 +25,7 @@ block content
     div
       .right
         label(for='upload-title') Display Title
-          .small
-            | optional
+          .small optional
       .left
         input(name='title', id='upload-title', size='50')
     div
@@ -39,14 +38,15 @@ block content
     div
       .right
         label(for='info-link') Info Link
+          .small optional
       .left
         input(name='infolink', id='info-link', size='40')
     div
       .right
         label(for='upload-description') Description<br />
           .small
-            | Parses
-            a(href='http://daringfireball.net/projects/markdown/')  markdown
+            | Parses&nbsp;
+            a(href='http://daringfireball.net/projects/markdown/') markdown
             |  syntax
       .left
         textarea(id='upload-description', name='description', rows='4', cols='40')

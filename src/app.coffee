@@ -1,4 +1,4 @@
-#!/usr/bin/env coffee
+#!./node_modules/coffee-script/bin/coffee
 
 # Module dependencies.
 require 'coffee-script'

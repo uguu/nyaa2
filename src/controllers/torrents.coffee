@@ -18,7 +18,7 @@ feed.generate = (callback) ->
   query = Torrent.find {}
   query.limit 50
   query.select { title : 1, size : 1, dateUploaded : 1, category : 1, permalink : 1, uploader : 1}, { _id : 0 }
-  query.sort 'dateUploaded', -1
+  query.sort { dateUploaded: 'desc' }
   query.exec (err, docs) ->
     for torrent in docs
       if torrent.author == undefined

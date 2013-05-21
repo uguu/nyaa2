@@ -32,7 +32,6 @@ ANNOUNCE_INTERVAL = 300
 
 Torrent.statics.findTorrents = (q, callback) ->
   q.select { title : 1, size : 1, dateUploaded : 1, category : 1, permalink : 1, snatches : 1, infohash : 1 }, { _id : 0 }
-  q.sort 'dateUploaded', -1
   q.sort { dateUploaded: 'desc' }
   q.exec (err, docs) ->
     if docs isnt undefined
