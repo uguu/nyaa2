@@ -44,11 +44,10 @@ html
                 input(name='searchtext', value='', size='30')
                 //-input(type='submit', value='Search')
     #content
-      // - var flash = req.flash()
-      // - if (flash.error)
-        //- #flash.error= flash.error
-      // - if (flash.info)
-        //- #flash.info= flash.info
+      if (flash.error)
+        #flash.error= flash.error
+      if (flash.info)
+        #flash.info= flash.info
       block content
 
     #footer

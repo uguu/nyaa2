@@ -7,6 +7,7 @@ util = require 'util'
 qs = require 'querystring'
 RedisStore = require('connect-redis')(express);
 stylus = require 'stylus'
+flashify = require 'flashify'
 
 #Create express server
 app = module.exports = express()
@@ -60,6 +61,7 @@ app.configure ->
   app.use express.methodOverride()
   app.use express.cookieParser()
   app.use express.session {secret: 'himitsu', store: new RedisStore}
+  app.use flashify
   app.use (req, res, next) ->
     res.locals.query = req.query
     res.locals.username = if req.session.user? then req.session.user.name else undefined

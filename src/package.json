@@ -12,7 +12,8 @@
     "connect-redis": "1.4.5",
     "markdown": "0.4.0",
     "rss": "0.0.4",
-    "stylus": "0.32.1"
+    "stylus": "0.32.1",
+    "flashify": "0.1.2"
   },
   "readme": "no u"
 }
