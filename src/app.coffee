@@ -62,6 +62,8 @@ app.configure ->
   app.use express.session {secret: 'himitsu', store: new RedisStore}
   app.use (req, res, next) ->
     res.locals.query = req.query
+    res.locals.username = if req.session.user? then req.session.user.name else undefined
+    res.locals.admin = req.session.admin
     res.locals.categories = Categories.categories
     res.locals.meta_categories = Categories.meta_categories
     res.locals.paginate = (page, lastpage) ->

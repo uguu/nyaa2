@@ -18,11 +18,10 @@ block content
     p
       span(id='category')= torrent.category
     h3 Uploaded
-    p(title=torrent.dateUploaded)= humanize_date(torrent.dateUploaded)
+    p(title=torrent.dateUploaded)= humanize_date(torrent.dateUploaded) + ' ago by '
       if torrent.uploader === undefined
-        | by Anonymous
+        | Anonymous
       else
-        | by
         a(href=('/user/' + torrent.uploader))= torrent.uploader
     h3 Statistics
     p Peers: #{torrent.peers}, Seeds: #{torrent.seeds}, Downloads: #{torrent.snatches}
@@ -35,5 +34,6 @@ block content
         tr
           td= file.path
           td= humanize_size(file.size)
-    h3 Problem
-    a(class='delete', href=('/torrent/' + torrent.permalink + '/delete')) Delete torrent
+    if (admin === true || (username !== undefined && torrent.uploader === username))
+      h3 Problem
+      a(class='delete', href=('/torrent/' + torrent.permalink + '/delete')) Delete torrent

@@ -1,13 +1,13 @@
 extends ../layout
 
 block content
-  - if (torrents.length)
-    - if (query.searchtext && query.searchcategory)
+  if (torrents.length)
+    if (query.searchtext && query.searchcategory)
       p Searched for "#{query.searchtext}" in #{query.searchcategory} and found #{count} torrents:
-    - else
+    else
       p There are #{count} torrents being tracked.
     include torrenttable
     p !{paginate(page, lastpage)}
 
-  - else
+  else
     p There were no torrents found.
