@@ -118,14 +118,14 @@ exports.upload_post = (req, res) ->
             size = 0
             for file in torrentInfo.info.files
               torrentFiles.push {
-                'path' : (file.path.toString 'utf8'),
+                'path' : (file.path.join '/'),
                 'size' : file.length
               }
               size += file.length
           else
             size = torrentInfo.info.length
             torrentFiles.push {
-              'path' : (torrentInfo.info.name.toString 'utf8'),
+              'path' : (torrentInfo.info.name.join '/'),
               'size' : torrentInfo.info.length
             }
 
