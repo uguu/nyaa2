@@ -292,3 +292,12 @@ exports.infohash_exists = (req, res) ->
       res.send '1'
     else
       res.send '0'
+
+exports.infohash_snatched = (req, res) ->
+  Torrent.findOne {'infohash' : req.params.infohash}, (err, doc) ->
+    if doc
+      doc.snatches += 1
+      doc.save (err) ->
+        res.send 'OK'
+    else
+      res.send 'Torrent not found'

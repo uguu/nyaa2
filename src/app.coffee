@@ -147,6 +147,7 @@ app.post '/torrent/:permalink/edit', torrents.edit
 app.get '/categories_json', torrents.categories_json
 app.get '/torrent/:permalink/getmarkup', torrents.getmarkup
 app.get '/tracker/:infohash', torrents.infohash_exists
+app.get '/tracker/:infohash/snatched', torrents.infohash_snatched
 
 app.get '/rss', torrents.rss
 
