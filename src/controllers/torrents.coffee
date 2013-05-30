@@ -285,3 +285,10 @@ exports.edit = (req, res) ->
         res.send 'Invalid request'
     else
       res.send 'Torrent not found'
+
+exports.infohash_exists = (req, res) ->
+  Torrent.findOne {'infohash' : req.params.infohash}, (err, doc) ->
+    if doc
+      res.send '1'
+    else
+      res.send '0'
