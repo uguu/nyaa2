@@ -289,7 +289,7 @@ exports.edit = (req, res) ->
 exports.infohash_exists = (req, res) ->
   Torrent.findOne {'infohash' : req.params.infohash}, (err, doc) ->
     if doc
-      res.send 200
+      res.send doc.snatches.toString()
     else
       res.send 404
 
