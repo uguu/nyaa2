@@ -28,16 +28,16 @@ Torrent = new Schema {
 }
 
 DROP_COUNT = 3
-ANNOUNCE_INTERVAL = 300
+ANNOUNCE_INTERVAL = 1800
 
 Torrent.statics.findTorrents = (q, callback) ->
   q.select { title : 1, size : 1, dateUploaded : 1, category : 1, permalink : 1, snatches : 1, infohash : 1 }, { _id : 0 }
   q.sort { dateUploaded: 'desc' }
   q.exec (err, docs) ->
     if docs isnt undefined
+      t = Date.now()
       t_ago = t - ANNOUNCE_INTERVAL * DROP_COUNT * 1000
       multi = redis.multi()
-      t = Date.now()
       for doc in docs
         key_seed = 'torrent:' + doc.infohash + ':seeds'
         key_peer = 'torrent:' + doc.infohash + ':peers'
