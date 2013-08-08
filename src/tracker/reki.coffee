@@ -1,14 +1,12 @@
+#!../node_modules/coffee-script/bin/coffee
+
 # includes
 http = require 'http'
-url  = require 'url'
-qs   = require 'querystring'
-fs   = require 'fs'
-bencode2 = require '../../lib/bencode'
 
 # defines
 ANNOUNCE_INTERVAL = 1800 # 30 mins
 MIN_INTERVAL      = 60
-DROP_COUNT = 3
+DROP_COUNT        = 3
 
 # helper functions
 simple_response = (res, data) ->
@@ -25,7 +23,6 @@ parse = (qs) ->
 
 #bencode.bencode = (o) -> new Buffer 1
 bencode_str = (o) ->
-  #return bencode2.bencode o
   bstring = (s) -> s.length + ':' + s
   bint = (n) -> "i#{n}e"
   blist = (l) ->
@@ -103,7 +100,7 @@ class Tracker
 
     # http server
     http.createServer (req, res) =>
-      #req_url = url.parse req.url
+      console.log req.url
       if req.url.substr(0, 9) is '/announce'
         if query = req.url.split('?', 2)[1]
           @announce query, req, res
@@ -166,12 +163,12 @@ class Tracker
 
       t = Date.now()
       multi = redis.multi()
-        .ZREMRANGEBYSCORE(key_seed, 0, t - ANNOUNCE_INTERVAL * DROP_COUNT *1000)
-        .ZREMRANGEBYSCORE(key_peer, 0, t - ANNOUNCE_INTERVAL * DROP_COUNT *1000)
+        .ZREMRANGEBYSCORE(key_seed, 0, t - ANNOUNCE_INTERVAL * DROP_COUNT * 1000)
+        .ZREMRANGEBYSCORE(key_peer, 0, t - ANNOUNCE_INTERVAL * DROP_COUNT * 1000)
 
       ip = get_vars['ip'] #REALLY SHOULD CHECK THIS IS A VALID IP
-      ip = req.connection.remoteAddress if !ip?
-      return if !ip?
+      ip = req.connection.remoteAddress unless ip?
+      return unless ip?
       #ip = process.env['HTTP_X_REAL_IP'] if ip is '127.0.0.1'
 
       peer_entry = { 'ip' : ip, 'port' : port, 'peer_id' : get_vars['peer_id'], 'compacted' : compact(ip, port) }
@@ -232,7 +229,7 @@ class Tracker
       return simple_response res, {'failure reason': 'No valid hashes requested'} if docs.length is 0
       infohash = []
       snatches = [] # downloaded
-      for i in [0...docs.length] # not sure why but docs.length-1 skips the last item
+      for i in [0...docs.length]
         ih = docs[i].infohash
         key = 'torrent:' + ih
         infohash.push ih
